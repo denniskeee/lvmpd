@@ -1,0 +1,1897 @@
+<!DOCTYPE html>
+<html lang="hu">
+<head>
+  <meta charset="UTF-8" />
+  <title>Penal Code Kalkulátor</title>
+  <style>
+  body {
+      display: flex;
+      font-family: sans-serif;
+      margin: 20px;
+    }
+    .calculator {
+      width: 240px;
+      padding: 16px;
+      border: 1px solid #ccc;
+      border-radius: 8px;
+      margin-right: 30px;
+      height: fit-content;
+    }
+    .calculator h2 {
+      font-size: 18px;
+      margin-bottom: 10px;
+    }
+    .result-box {
+      width: 100%;
+      resize: none;
+      overflow: hidden;
+      height: 60px;
+      font-size: 12px;
+      padding: 5px;
+      margin-bottom: 10px;
+      border: 1px solid #ccc;
+      border-radius: 4px;
+    }
+    .bail-status {
+      font-weight: bold;
+      margin-bottom: 10px;
+    }
+    .laws-wrapper {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      flex: 1;
+    }
+    .law-section {
+      width: 100%;
+      max-width: 900px;
+      margin-bottom: 24px;
+    }
+    .toggle-button {
+      padding: 12px 20px;
+      font-size: 18px;
+      cursor: pointer;
+      width: 100%;
+      text-align: left;
+      background-color: #eaeaea;
+      border: 1px solid #ccc;
+      border-radius: 8px;
+      user-select: none;
+    }
+
+    /* KÖZÉP: LENYITHATÓ FÜLEK */
+    .accordion {
+      width: 60%;
+      margin: 50px auto;
+    }
+
+    .accordion-item {
+      background-color: #eee;
+      margin-bottom: 10px;
+      border-radius: 5px;
+      overflow: hidden;
+    }
+
+
+    .accordion-header {
+      padding: 10px;
+      background-color: #ccc;
+      cursor: pointer;
+    }
+
+    .accordion-content {
+      padding: 10px;
+      display: none;
+    }
+
+    .accordion-content label {
+      display: block;
+      margin: 5px 0;
+    }
+  </style>
+</head>
+<body>
+
+<!-- BAL OLDALI KALKULÁTOR -->
+<!--<div id="calculator-container">
+  <p><strong>Jail (min):</strong> <span id="jailMin">0</span> p</p>
+  <p><strong>Jail (max):</strong> <span id="jailMax">0</span> p</p>
+  <p><strong>Bírság (min):</strong> $<span id="fineMin">0</span></p>
+  <p><strong>Bírság (max):</strong> $<span id="fineMax">0</span></p>
+  <p><strong>Óvadék:</strong> <span id="bailStatus" style="font-weight:bold">–</span></p>
+
+  <textarea id="resultBox" readonly></textarea><br />
+  <button type="button" onclick="clearSelection()">Törlés</button>
+  <button type="button" onclick="copyToClipboard()">Másolás</button>
+</div>-->
+
+  <div class="calculator">
+    <h2>Kalkulátor</h2>
+    <p>Jail (min): <span id="jailMin">0</span> perc</p>
+    <p>Jail (max): <span id="jailMax">0</span> perc</p>
+    <p>Bírság (min): $<span id="fineMin">0</span></p>
+    <p>Bírság (max): $<span id="fineMax">0</span></p>
+    <p id="bailRow">Óvadék lehetősége: <span id="bailStatus" class="bailStatus">–</span></p>
+    <textarea class="result-box" id="resultBox" readonly></textarea>
+    <button id="copyToClipboard">Másolás</button>
+    <button id="clearSelection">Törlés</button>
+  </div>
+
+<!-- KÖZÉP: LENYITHATÓ FÜLEK -->
+<div class="accordion">
+  <div class="accordion-item">
+    <div class="accordion-header" onclick="toggleAccordion(this)">
+      I. PARAGRAFUS - EMBER ELLEN ELKÖVETETT BŰNCSELEKMÉNYEK
+    </div>
+    <div class="accordion-content">
+      <label
+        ><input
+          type="checkbox"
+          name="law"
+          value="1(01.1)"
+          data-jail-min="200"
+          data-jail-max="200"
+          data-fine-min="200000"
+          data-fine-max="200000"
+          data-bail="false"
+      /> Szándékos emberölés</label>
+      <div style="font-size:15px; color:gray; margin-left:18px; margin-bottom:8px;">
+       Ha valaki egy másik ember életét jogosulatlanul, szándékosan,vagy előre megtervezve veszi el az bűncselekményt követ el.
+       </div>
+
+      <label
+        ><input
+          type="checkbox"
+          name="law"
+          value="1(01.2)"
+          data-jail-min="150"
+          data-jail-max="150"
+          data-fine-min="150000"
+          data-fine-max="150000"
+          data-bail="false"
+      /> Vétlen emberölés</label>
+      <div style="font-size:15px; color:gray; margin-left:18px; margin-bottom:8px;">
+       Ha valaki egy másik ember életét jogosulatlanul, önhibából azaz nem előre megtervezett szándékkal veszi el az bűncselekményt követ el.
+    </div>
+
+      <label
+        ><input
+          type="checkbox"
+          name="law"
+          value="1(01,PO)"
+          data-jail-min="300"
+          data-jail-max="300"
+          data-fine-min="300000"
+          data-fine-max="300000"
+          data-bail="false"
+      /> Hivatali személy, Peace Officer esetében $300 000 a bírság és 300 perc a börtönbüntetés</label>
+
+      <label
+        ><input
+          type="checkbox"
+          name="law"
+          value="1(02)"
+          data-jail-min="120"
+          data-jail-max="120"
+          data-fine-min="120000"
+          data-fine-max="120000"
+          data-bail="false"
+      /> Emberölési kísérlet</label>
+    <div style="font-size:15px; color:gray; margin-left:18px; margin-bottom:8px;">
+        Ha egy személy, egy másik személy életét szándékosan veszélyezteti, megpróbálja megölni őt, bűncselekményt követ el.
+    </div>
+
+      <label
+        ><input
+          type="checkbox"
+          name="law"
+          value="1(02,PO)"
+          data-jail-min="200"
+          data-jail-max="200"
+          data-fine-min="200000"
+          data-fine-max="200000"
+          data-bail="false"
+      /> Hivatali személy, Peace Officer esetében $200 000 bírság és 200 perc börtönbüntetés.</label>
+
+
+
+       <label
+        ><input
+          type="checkbox"
+          name="law"
+          value="1(03)"
+          data-jail-min="0"
+          data-jail-max="0"
+          data-fine-min="0"
+          data-fine-max="0"
+          data-bail="true"
+      /> Testi sértés (Óvadék lehetősége)</label>
+      <div style="font-size:15px; color:gray; margin-left:18px; margin-bottom:8px;">
+        Ha egy személy, egy másik személynek szándékosan sérülést okoz, vétséget követ el.
+    </div>
+
+<label
+        ><input
+          type="checkbox"
+          name="law"
+          value="1(03.1)"
+          data-jail-min="45"
+          data-jail-max="45"
+          data-fine-min="50000"
+          data-fine-max="50000"
+          data-bail="true"
+      /> Könnyű testi sértés (Óvadék lehetősége).</label>
+      <div style="font-size:15px; color:gray; margin-left:18px; margin-bottom:8px;">
+        A sértett nem szenved 8 napon túl gyógyuló sérülést.
+      </div>
+
+      <label
+        ><input
+          type="checkbox"
+          name="law"
+          value="1(03.2)"
+          data-jail-min="75"
+          data-jail-max="75"
+          data-fine-min="100000"
+          data-fine-max="100000"
+          data-bail="false"
+      /> Súlyos testi sértés.</label>
+      <div style="font-size:15px; color:gray; margin-left:18px; margin-bottom:8px;">
+        A sértett a helyszínen súlyos sérüléseket szenved.
+      </div>
+
+      <label
+        ><input
+          type="checkbox"
+          name="law"
+          value="1(04)"
+          data-jail-min="120"
+          data-jail-max="120"
+          data-fine-min="120000"
+          data-fine-max="120000"
+          data-bail="false"
+      /> Emberrablás.</label>
+      <div style="font-size:15px; color:gray; margin-left:18px; margin-bottom:8px;">
+        Ha egy személy, egy másik embert, a személyi szabadságától megfosztja, bűncselekményt követ el.
+      </div>
+
+          <label
+        ><input
+          type="checkbox"
+          name="law"
+          value="1(04,PO)"
+          data-jail-min="150"
+          data-jail-max="150"
+          data-fine-min="170000"
+          data-fine-max="170000"
+          data-bail="false"
+      /> Hivatali személy, Peace Officer esetében $170 000 a bírság és 150 perc a börtönbüntetés.</label>
+      </div>  
+
+  </div>
+
+  <div class="accordion-item">
+    <div class="accordion-header" onclick="toggleAccordion(this)">
+      II. PARAGRAFUS - TULAJDON ELLEN ELKÖVETETT BŰNCSELEKMÉNYEK ÉS JOGALAP NÉLKÜLI GAZDAGODÁS
+    </div>
+    <div class="accordion-content">
+      <label
+        ><input
+          type="checkbox"
+          name="law"
+          value="2(01)"
+          data-jail-min="45"
+          data-jail-max="45"
+          data-fine-min="80000"
+          data-fine-max="80000"
+          data-bail="true"
+      /> Tiltott területre való behatolás (Óvadék lehetősége)</label>
+      <div style="font-size:15px; color:gray; margin-left:18px; margin-bottom:8px;">
+       Ha egy személy, a Las Venturas Metropolitan Police Department, a San Andreas Sheriff Department vagy a Federal Bureau of Investigation által birtokolt, lezárt területre, írásos engedély nélkül belép, bűncselekményt követ el. ​
+    </div>
+
+      <label
+        ><input
+          type="checkbox"
+          name="law"
+          value="2(02)"
+          data-jail-min="80"
+          data-jail-max="80"
+          data-fine-min="90000"
+          data-fine-max="90000"
+          data-bail="true"
+      /> Jármű lopás (Óvadék lehetősége)</label>
+      <div style="font-size:15px; color:gray; margin-left:18px; margin-bottom:8px;">
+         a,  Ha valaki más járművébe jogtalanul száll be, majd felszólítsára sem száll ki akkor az vétséget követ el.
+      </div>
+      <div style="font-size:15px; color:gray; margin-left:18px; margin-bottom:8px;">
+         b, Ha valaki más járművét jogtalanul eltulajdonítja, elveszi akkor az bűncselekményt követ el.
+    </div>
+
+          <label
+        ><input
+          type="checkbox"
+          name="law"
+          value="2(03)"
+          data-jail-min="100"
+          data-jail-max="100"
+          data-fine-min="120000"
+          data-fine-max="120000"
+          data-bail="false"
+      /> Rablás</label>
+      <div style="font-size:15px; color:gray; margin-left:18px; margin-bottom:8px;">
+         a,  Ha valaki más tulajdonát testi vagy lelki erőszakkal, megfélelmlítéssel eltulajdonítja az bűncselekményt követ el.
+      </div>
+      <div style="font-size:15px; color:gray; margin-left:18px; margin-bottom:8px;">
+         b, A fegyveres rablás és a rablás nem adható egybe.
+    </div>
+    
+          <label
+        ><input
+          type="checkbox"
+          name="law"
+          value="2(04)"
+          data-jail-min="120"
+          data-jail-max="120"
+          data-fine-min="150000"
+          data-fine-max="150000"
+          data-bail="false"
+      /> Fegyveres rablás</label>
+      <div style="font-size:15px; color:gray; margin-left:18px; margin-bottom:8px;">
+         a,  Ha valaki más tulajdonát akaratának ellenére erőszakkal, lőfegyverrel vagy fegyvernek használt tárggyal eltulajdonítja az bűncselekményt követ el.
+      </div>
+      <div style="font-size:15px; color:gray; margin-left:18px; margin-bottom:8px;">
+         b, A fegyveres rablás és a rablás nem adható egybe.
+    </div>
+
+          <label
+        ><input
+          type="checkbox"
+          name="law"
+          value="2(05)"
+          data-jail-min="90"
+          data-jail-max="90"
+          data-fine-min="90000"
+          data-fine-max="90000"
+          data-bail="true"
+      /> Hamisítás (Óvadék lehetősége)</label>
+      <div style="font-size:15px; color:gray; margin-left:18px; margin-bottom:8px;">
+         a,  Ha egy személy tudatosan készít, használ olyan dokumentumot amellyel csalást vihet véghez az bűncselekményt követ el.
+      </div>
+      <div style="font-size:15px; color:gray; margin-left:18px; margin-bottom:8px;">
+         b, Ha egy személy tudatosan okmányt, egyedi azonosítót hamisít vagy másol az bűncselekményt követ el.
+    </div>
+
+          <label
+        ><input
+          type="checkbox"
+          name="law"
+          value="2(06)"
+          data-jail-min="0"
+          data-jail-max="0"
+          data-fine-min="60000"
+          data-fine-max="60000"
+          data-bail="none"
+      /> Rongálás</label>
+      <div style="font-size:15px; color:gray; margin-left:18px; margin-bottom:8px;">
+         a,  Ha egy személy egy másik személy tulajdonában tudatosan $10 000 alatti kárt okoz az vétséget követ el.
+      </div>
+      <div style="font-size:15px; color:gray; margin-left:18px; margin-bottom:8px;">
+         b, Ha egy személy egy másik személy tulajdonában tudatosan $10 000 fölötti kárt okoz az bűncselekményt követ el.
+    </div>
+
+          <label
+        ><input
+          type="checkbox"
+          name="law"
+          value="2(06.b)"
+          data-jail-min="30"
+          data-jail-max="30"
+          data-fine-min="60000"
+          data-fine-max="60000"
+          data-bail="none"
+      /> Rongálás</label>
+      <div style="font-size:15px; color:gray; margin-left:18px; margin-bottom:8px;">
+           2(06.b) esetén a börtönbüntetés 30 perc.
+      </div>
+      <div style="font-size:15px; color:gray; margin-left:18px; margin-bottom:8px;">
+          Ha a személy a kárt teljes mértékben megtéríti akkor a bírságról a Peace Officer szabadon dönthet.
+    </div>
+
+          <label
+        ><input
+          type="checkbox"
+          name="law"
+          value="2(07)"
+          data-jail-min="100"
+          data-jail-max="100"
+          data-fine-min="100000"
+          data-fine-max="100000"
+          data-bail="false"
+      /> Rongálás</label>
+      <div style="font-size:15px; color:gray; margin-left:18px; margin-bottom:8px;">
+         a,  Ha egy személy más ingatlanjába, magánterületére erőszakkal vagy fenyegető jelleggel lép be, illetve marad ott, az bűncselekményt követ el.
+      </div>
+      <div style="font-size:15px; color:gray; margin-left:18px; margin-bottom:8px;">
+         b, Ha egy személy felfegyverkezve más ingatlanjába, magánterületére erőszakkal vagy fenyegető jelleggel lép be, illetve marad ott az bűncselekményt követ el.
+    </div>
+
+          <label
+        ><input
+          type="checkbox"
+          name="law"
+          value="2(07.b)"
+          data-jail-min="120"
+          data-jail-max="120"
+          data-fine-min="120000"
+          data-fine-max="120000"
+          data-bail="false"
+      /> Betörés</label>
+      <div style="font-size:15px; color:gray; margin-left:18px; margin-bottom:8px;">
+       Felfegyverkezett betörés esetében a bírság $90 000 és a börtönbüntetés 120 perc.
+    </div>
+
+  </div>
+  </div>
+
+
+     <div class="accordion-item">
+    <div class="accordion-header" onclick="toggleAccordion(this)">
+      III. PARAGRAFUS - FEGYVEREKKEL, KÁBÍTÓ ÉS- BÓDÍTÓSZEREKKEL KAPCSOLATOS BŰNCSELEKMÉNYEK
+    </div>
+    <div class="accordion-content">
+      <label
+        ><input
+          type="checkbox"
+          name="law"
+          value="3(01)"
+          data-jail-min="90"
+          data-jail-max="90"
+          data-fine-min="130000"
+          data-fine-max="130000"
+          data-bail="false"
+      <label
+  <input type="checkbox" ... >
+  <span style="font-weight: bold;">Kábítószer birtoklás</span>
+</label>
+      <div style="font-size:15px; color:gray; margin-left:18px; margin-bottom:8px;">
+       a, Ha egy személy kenderszármazéktól eltérő kábítószert birtokol az vétséget követ el.
+    </div>
+      <div style="font-size:15px; color:gray; margin-left:18px; margin-bottom:8px;">
+       b, Aki 0.85 uncia (25g) mértéket meghaladó kenderszármazékot (Füves cigi, hasis, szárított marihuána) fogyaszt vagy birtokol, vétség miatt büntetendő.
+      </div>
+      <div style="font-size:15px; color:gray; margin-left:18px; margin-bottom:8px;">
+       A 0.85 uncia mértéket meg nem haladó kenderszármazék fogyasztás vagy birtoklás nem büntetendő. (( 5 db ))
+      </div>
+      <div style="font-size:15px; color:gray; margin-left:18px; margin-bottom:8px;">
+       c, Ha egy személy kábítószer alapanyagot birtokol az vétséget követ el.​​"
+      </div>
+
+
+      <label
+        ><input
+          type="checkbox"
+          name="law"
+          value="3(02)"
+          data-jail-min="120"
+          data-jail-max="120"
+          data-fine-min="150000"
+          data-fine-max="150000"
+          data-bail="true"
+ <label
+  <input type="checkbox" ... >
+  <span style="font-weight:bold">Kábítószer kereskedelem</span>
+</label>
+      <div style="font-size:15px; color:gray; margin-left:18px; margin-bottom:8px;">
+         a,  Ha egy személy kábítószert ad el vagy eladási céllal birtokol az bűncselekményt követ el.
+      </div>
+      <div style="font-size:15px; color:gray; margin-left:18px; margin-bottom:8px;">
+         b, Kereskedelmi mennyiségnek számít a 1.80 uncia (50 gramm) feletti mennyiség. (( 10 db ))
+    </div>
+
+          <label
+        ><input
+          type="checkbox"
+          name="law"
+          value="3(03)"
+          data-jail-min="70"
+          data-jail-max="70"
+          data-fine-min="80000"
+          data-fine-max="80000"
+          data-bail="false"
+          <label
+          <input type="checkbox"... >
+          <span style="font-weight: bold;">Engedély nélküli/illegális kábítószer termesztés</span>
+      </label>
+      <div style="font-size:15px; color:gray; margin-left:18px; margin-bottom:8px;">
+         a,   Ha egy személy engedély nélkül termeszt marihuánát az vétséget követ el.
+      </div>
+      <div style="font-size:15px; color:gray; margin-left:18px; margin-bottom:8px;">
+         b, Ha egy személy kenderszármazéktól eltérő, kábítószer hatású növényt termeszt az vétséget követ el.
+    </div>
+    
+          <label
+        ><input
+          type="checkbox"
+          name="law"
+          value="3(04)"
+          data-jail-min="0"
+          data-jail-max="0"
+          data-fine-min="0"
+          data-fine-max="0"
+          data-bail="none"
+          <label
+          <input type="checkbox"...>
+          <span style="font-weight: bold;" >Tiltott tárgy birtoklása</span>
+      </label>
+      <div style="font-size:15px; color:gray; margin-left:18px; margin-bottom:8px;">
+         a,  Ha egy személy államilag tiltott tárgyat birtokol az vétséget követ el.​
+      </div>
+      <div style="font-size:15px; color:gray; margin-left:18px; margin-bottom:8px;">
+         b, Ide sorolandó: Tervrajz
+    </div>
+        <div style="font-size:15px; color:gray; margin-left:18px; margin-bottom:8px;">
+         Az eszközt azonnal el kell kobozni és meg kell semmisíteni.
+    </div>
+        <div style="font-size:15px; font-weight:bold; color:#664d03; margin-left:18px; margin-bottom:8px;">
+         $80 000 / db
+    </div>
+
+              <label
+        ><input
+          type="checkbox"
+          name="law"
+          value="3(04.1)"
+          data-jail-min="60"
+          data-jail-max="60"
+          data-fine-min="0"
+          data-fine-max="0"
+          data-bail="true"
+          <label
+          <input type="checkbox"...>
+          <span style="font-weight: bold;">Tiltott tárolóeszköz birtoklása (Óvadék lehetősége)</span>    
+      </label>
+      <div style="font-size:15px; color:gray; margin-left:18px; margin-bottom:8px;">
+         a,  Ha valaki államilag tiltott tárolóeszközt birtokol, az bűncselekményt követ el.
+      </div>
+      <div style="font-size:15px; color:gray; margin-left:18px; margin-bottom:8px;">
+         b, Ide sorolandó: drogot, drog alapanyagot, lőszert, fegyvert, fegyveralkatrészt, tervrajzot tartalmazó ládák.
+    </div>
+        <div style="font-size:15px; font-weight:bold; color:#664d03; margin-left:18px; margin-bottom:8px;">
+         $30 000 / db
+    </div>
+
+          <label
+        ><input
+          type="checkbox"
+          name="law"
+          value="3(05)"
+          data-jail-min="120"
+          data-jail-max="120"
+          data-fine-min="170000"
+          data-fine-max="170000"
+          data-bail="false"
+          <label
+          <input type="checkbox"...> 
+          <span style="font-weight: bold;">Illegális lőfegyver birtoklása</span>
+      </label>
+      <div style="font-size:15px; color:gray; margin-left:18px; margin-bottom:8px;">
+         a,  Ha egy személy Államilag tiltott lőfegyvert birtokol az bűncselekményt követ el.​
+      </div>
+      <div style="font-size:15px; color:gray; margin-left:18px; margin-bottom:8px;">
+         b, Illegális lőfegyvernek minősül:<span style="color: #664d03;"> AR-15, AK-74, M4A1, Micro Draco,AK-47, M4, Sniper, Country Rifle, Shotgun, Desert Eagle, SPAZ, Sawed-Off, Silenced, Tec-9, Uzi, P90, MP5, MP7, Remington 870, Benelli M4, M14, Mozin, Dragunov, Remington M700, M110.</span>
+    </div>
+          <div style="font-size:15px; color:gray; margin-left:18px; margin-bottom:8px;">
+         c,  Továbbá ide sorolható a <span style="color: #664d03;">Molotov, Flashbang,Füstgránát.</span>
+      </div>
+
+          <label
+        ><input
+          type="checkbox"
+          name="law"
+          value="3(06)"
+          data-jail-min="150"
+          data-jail-max="150"
+          data-fine-min="200000"
+          data-fine-max="200000"
+          data-bail="false"
+          <label
+          <input type="checkbox"...>
+          <span style="font-weight: bold;">Illegális fegyverkereskedelem</span>
+    </label>
+      <div style="font-size:15px; color:gray; margin-left:18px; margin-bottom:8px;">
+         a,  Ha egy személy Államilag tiltott fegyvert eladásra kínál, vagy vásárol az bűncselekményt követ el.​
+      </div>
+
+          <label
+        ><input
+          type="checkbox"
+          name="law"
+          value="3(07)"
+          data-jail-min="90"
+          data-jail-max="90"
+          data-fine-min="120000"
+          data-fine-max="120000"
+          data-bail="true"
+          <label
+          <input type="checkbox"...>
+          <span style="font-weight: bold;">Engedély nélküli fegyver birtoklása (Óvadék lehetősége)</span>
+      </label>
+      <div style="font-size:15px; color:gray; margin-left:18px; margin-bottom:8px;">
+           Ha egy személy engedély nélküli fegyvert birtokol (Glock 17, Glock 19, HP USP 45, Colt 1911, Colt 45, Vipera, Boxer, S&W 66, Kés) az bűncselekményt követ el.​​
+      </div>
+
+
+          <label
+        ><input
+          type="checkbox"
+          name="law"
+          value="3(08)"
+          data-jail-min="60"
+          data-jail-max="60"
+          data-fine-min="0"
+          data-fine-max="0"
+          data-bail="false"
+          <label
+          <input type="checkbox"...>
+          <span style="font-weight: bold;">Engedély nélküli töltény birtoklása</span>
+       </label>
+      <div style="font-size:15px; color:gray; margin-left:18px; margin-bottom:8px;">
+         a,  Ha egy személy engedélyhez kötött fegyverhez tartozó töltényt birtokol, úgy, hogy az engedély nincsen a tulajdonában bűncselekményt követ el.
+      </div>
+      <div style="font-size:15px; color:gray; margin-left:18px; margin-bottom:8px;">
+         b, Ha egy személy engedélyhez kötött fegyverhez tartozó töltényt nagyobb mennyiségben birtokol mint az Állam által engedélyezett mennyiség bűncselekményt követ el.
+    </div>
+          <div style="font-size:15px; color:gray; margin-left:18px; margin-bottom:8px;">
+          A maximum bírság $300 000. | <span style="color: #664d03;">$15 000 / db</span> 
+    </div>
+
+          <label
+        ><input
+          type="checkbox"
+          name="law"
+          value="3(09)"
+          data-jail-min="0"
+          data-jail-max="0"
+          data-fine-min="70000"
+          data-fine-max="70000"
+          data-bail="none"
+          <label
+          <input type="checkbox"...>
+          <span style="font-weight: bold;">Nyílt fegyverviselés</span>
+      </label>
+      <div style="font-size:15px; color:gray; margin-left:18px; margin-bottom:8px;">
+       Ha egy személy megfelelő felhatalmazás nélkül, látható módon viseli lőfegyverét, az vétséget követ el.
+    </div>
+    <div style="font-weight: bold; color: #ffc107; margin-left: 18px; margin-bottom: 8px;">
+      Első alkalom
+    </div>
+
+              <label
+        ><input
+          type="checkbox"
+          name="law"
+          value="3(09)"
+          data-jail-min="0"
+          data-jail-max="0"
+          data-fine-min="120000"
+          data-fine-max="120000"
+          data-bail="none"
+          <label
+          <input type="checkbox"...>
+          <span style="font-weight: bold;">Nyílt fegyverviselés</span>
+      </label>
+    <div style="font-weight: bold; color: #ffc107; margin-left: 18px; margin-bottom: 8px;">
+      Második alkalom
+    </div>
+
+              <label
+        ><input
+          type="checkbox"
+          name="law"
+          value="3(09)"
+          data-jail-min="0"
+          data-jail-max="0"
+          data-fine-min="180000"
+          data-fine-max="180000"
+          data-bail="none"
+          <label
+          <input type="checkbox"...>
+          <span style="font-weight: bold;">Nyílt fegyverviselés</span>
+      </label>
+      <div style="font-size:15px; color:gray; margin-left:18px; margin-bottom:8px;">
+       Harmadik alkalom utáni visszaélés esetén a fegyverengedély bevonható.
+    </div>
+    <div style="font-weight: bold; color: #ffc107; margin-left: 18px; margin-bottom: 8px;">
+      Harmadik alkalom
+    </div>
+
+          <label
+        ><input
+          type="checkbox"
+          name="law"
+          value="3(10)"
+          data-jail-min="90"
+          data-jail-max="90"
+          data-fine-min="0"
+          data-fine-max="0"
+          data-bail="true"
+          <label
+          <input type="checkbox"...>
+          <span style="font-weight: bold;">Illegális fegyverhez tartozó töltény árusítása (Óvadék lehetősége)</span>
+       </label>
+      <div style="font-size:15px; color:gray; margin-left:18px; margin-bottom:8px;">
+         a,  Ha egy személy az Állam által illegálisnak minősített lőfegyverhez tartozót töltényeket árúsít akkor bűncselekményt követ el.​​
+      </div>
+          <div style="font-size:15px; color:gray; margin-left:18px; margin-bottom:8px;">
+          A maximum bírság $300 000. | <span style="color: #664d03;">$16 000 / db</span> 
+    </div>
+
+              <label
+        ><input
+          type="checkbox"
+          name="law"
+          value="3(11)"
+          data-jail-min="90"
+          data-jail-max="90"
+          data-fine-min="0"
+          data-fine-max="0"
+          data-bail="true"
+          <label
+          <input type="checkbox"...>
+          <span style="font-weight: bold;">Fegyveralkatrészek birtoklása (Óvadék lehetősége)</span>
+       </label>
+      <div style="font-size:15px; color:gray; margin-left:18px; margin-bottom:8px;">
+         a,  San Andreas Állam területén aki fegyveralkatrészt birtokol az vétséget követ el.​​
+      </div>
+          <div style="font-size:15px; color:#664d03; margin-left:18px; margin-bottom:8px;">
+          $50 000 / db
+    </div>
+
+                  <label
+        ><input
+          type="checkbox"
+          name="law"
+          value="3(12)"
+          data-jail-min="80"
+          data-jail-max="80"
+          data-fine-min="60000"
+          data-fine-max="60000"
+          data-bail="true"
+          <label
+          <input type="checkbox"...>
+          <span style="font-weight: bold;">Fegyveralkatrész kereskedelem (Óvadék lehetősége)</span>
+       </label>
+      <div style="font-size:15px; color:gray; margin-left:18px; margin-bottom:8px;">
+         a,  San Andreas Állam területén aki fegyveralkatrészt árusít az bűncselekményt követ el.​
+      </div>
+    </div>
+  </div>
+
+    <div class="accordion-item">
+    <div class="accordion-header" onclick="toggleAccordion(this)">
+      IV. PARAGRAFUS - KÖZJÓ ELLEN ELKÖVETETT BŰNCSELEKMÉNYEK
+    </div>
+    <div class="accordion-content">
+      <label
+        ><input
+          type="checkbox"
+          name="law"
+          value="4(01)"
+          data-jail-min="90"
+          data-jail-max="90"
+          data-fine-min="80000"
+          data-fine-max="80000"
+          data-bail="true"
+      <label
+  <input type="checkbox" ... >
+  <span style="font-weight: bold;">Prostitúció (Óvadék lehetősége)</span>
+</label>
+      <div style="font-size:15px; color:gray; margin-left:18px; margin-bottom:8px;">
+       a, Ha egy személy jutattásért vagy pénzért cserébe szexuális aktust végez vagy kínál fel az bűncselekményt követ el.
+    </div>
+
+
+
+      <label
+        ><input
+          type="checkbox"
+          name="law"
+          value="4(02)"
+          data-jail-min="60"
+          data-jail-max="60"
+          data-fine-min="60000"
+          data-fine-max="60000"
+          data-bail="true"
+ <label
+  <input type="checkbox" ... >
+  <span style="font-weight:bold">Prostitúcióra való felbujtás (Óvadék lehetősége)</span>
+</label>
+      <div style="font-size:15px; color:gray; margin-left:18px; margin-bottom:8px;">
+         a,  Ha egy személy juttatást vagy pénzt ajánl fel szexuális aktusért az bűncselekményt követ el.
+      </div>
+
+          <label
+        ><input
+          type="checkbox"
+          name="law"
+          value="4(03)"
+          data-jail-min="50"
+          data-jail-max="50"
+          data-fine-min="50000"
+          data-fine-max="50000"
+          data-bail="false"
+          <label
+          <input type="checkbox"... >
+          <span style="font-weight: bold;">Szexuális zaklatás</span>
+      </label>
+      <div style="font-size:15px; color:gray; margin-left:18px; margin-bottom:8px;">
+         a,   Ha egy személy valakit szóban, írásban vagy szociális médián szexuálisan zaklat az vétséget követ el.
+      </div>
+
+    
+          <label
+        ><input
+          type="checkbox"
+          name="law"
+          value="4(04)"
+          data-jail-min="90"
+          data-jail-max="90"
+          data-fine-min="60000"
+          data-fine-max="60000"
+          data-bail="false"
+          <label
+          <input type="checkbox"...>
+          <span style="font-weight: bold;" >Szexuális erőszak</span>
+      </label>
+      <div style="font-size:15px; color:gray; margin-left:18px; margin-bottom:8px;">
+         a,  Ha egy személy valakit akarata ellenére vagy beleegyezés nélkül szexuálisan megérint az bűncselekményt követ el.
+      </div>
+
+
+              <label
+        ><input
+          type="checkbox"
+          name="law"
+          value="4(05)"
+          data-jail-min="120"
+          data-jail-max="120"
+          data-fine-min="100000"
+          data-fine-max="100000"
+          data-bail="true"
+          <label
+          <input type="checkbox"...>
+          <span style="font-weight: bold;">Nemi erőszak</span>    
+      </label>
+      <div style="font-size:15px; color:gray; margin-left:18px; margin-bottom:8px;">
+         a,  Ha egy személy valakit akarata ellenére szexuális aktusra kényszerít az bűncselekményt követ el.​
+      </div>
+      <div style="font-size:15px; color:gray; margin-left:18px; margin-bottom:8px;">
+         b, Ha egy személy valakit annak beleegyezése nélkül szexuális aktusra kényszerít az bűncselekményt követ el.
+    </div>
+
+
+          <label
+        ><input
+          type="checkbox"
+          name="law"
+          value="4(06)"
+          data-jail-min="0"
+          data-jail-max="0"
+          data-fine-min="0"
+          data-fine-max="0"
+          data-bail="false"
+          <label
+          <input type="checkbox"...> 
+          <span style="font-weight: bold;">Bűnrészesség</span>
+      </label>
+      <div style="font-size:15px; color:gray; margin-left:18px; margin-bottom:8px;">
+         a,  Ha egy személy valakit egy bűncselekmény elkövetésére buzdít az bűncselekményt követ el.​
+      </div>
+      <div style="font-size:15px; color:gray; margin-left:18px; margin-bottom:8px;">
+         b, Ha egy személy valakit egy vétség elkövetésére buzdít az vétséget követ el.
+    </div>
+          <div style="font-size:15px; color:#800000; margin-left:18px; margin-bottom:8px; font-weight: bold;">
+          Az adott bekezdés adott pontjának fele a büntetés
+      </div>
+
+          <label
+        ><input
+          type="checkbox"
+          name="law"
+          value="4(07)"
+          data-jail-min="50"
+          data-jail-max="50"
+          data-fine-min="100000"
+          data-fine-max="100000"
+          data-bail="false"
+          <label
+          <input type="checkbox"...>
+          <span style="font-weight: bold;">Garázdaság</span>
+    </label>
+      <div style="font-size:15px; color:gray; margin-left:18px; margin-bottom:8px;">
+         a,  Azok a személyek akik rosszindulatúan és szándékosan megzavarják bármely más embertársuk békéjét vagy nyugalmát, vétséget követnek el.
+      </div>
+
+          <label
+        ><input
+          type="checkbox"
+          name="law"
+          value="4(08)"
+          data-jail-min="0"
+          data-jail-max="0"
+          data-fine-min="100000"
+          data-fine-max="100000"
+          data-bail="none"
+          <label
+          <input type="checkbox"...>
+          <span style="font-weight: bold;">Horgászengedély bemutatásának elmulasztása</span>
+      </label>
+      <div style="font-size:15px; color:gray; margin-left:18px; margin-bottom:8px;">
+           Ha egy személy tudatosan elmulasztja a horgászengedély érvényességének meghosszabbítását, vétséget követ el.
+      </div>
+    </div>
+</div>
+
+     <div class="accordion-item">
+    <div class="accordion-header" onclick="toggleAccordion(this)">
+      V. PARAGRAFUS - KÖZBIZTONSÁG ÉS- KÖZIGAZSÁG ELLENI BŰNCSELEKMÉNYEK
+    </div>
+    <div class="accordion-content">
+      <label
+        ><input
+          type="checkbox"
+          name="law"
+          value="5(01)"
+          data-jail-min="90"
+          data-jail-max="90"
+          data-fine-min="130000"
+          data-fine-max="130000"
+          data-bail="false"
+      <label
+  <input type="checkbox" ... >
+  <span style="font-weight: bold;">Vesztegetés</span>
+</label>
+      <div style="font-size:15px; color:gray; margin-left:18px; margin-bottom:8px;">
+       a, Ha egy személy juttatást, pénzt vagy egyéb javakat ajánl fel a Peace Officernek vagy hivatali dolgozónak akkor bűncselekményt követ el.
+    </div>
+
+
+
+      <label
+        ><input
+          type="checkbox"
+          name="law"
+          value="5(02)"
+          data-jail-min="60"
+          data-jail-max="60"
+          data-fine-min="100000"
+          data-fine-max="100000"
+          data-bail="false"
+ <label
+  <input type="checkbox" ... >
+  <span style="font-weight:bold">Hatóság előli menekülés gyalogosan</span>
+</label>
+      <div style="font-size:15px; color:gray; margin-left:18px; margin-bottom:8px;">
+         a,  Ha egy személy szándékosan felelősségre vonás elkerülése végett gyalogosan elmenekül a Peace Officer elől akkor bűncselekményt követ el.
+      </div>
+
+
+          <label
+        ><input
+          type="checkbox"
+          name="law"
+          value="5(03)"
+          data-jail-min="120"
+          data-jail-max="120"
+          data-fine-min="150000"
+          data-fine-max="150000"
+          data-bail="false"
+          <label
+          <input type="checkbox"... >
+          <span style="font-weight: bold;">Hatóság előli menekülés gépjárművel</span>
+      </label>
+      <div style="font-size:15px; color:gray; margin-left:18px; margin-bottom:8px;">
+         a,   Ha egy személy szándékosan felelősségre vonás elkerülése végett gépjárművel elmenekül a Peace Officer elől akkor bűncselekményt követ el.
+      </div>
+
+    
+          <label
+        ><input
+          type="checkbox"
+          name="law"
+          value="5(04)"
+          data-jail-min="60"
+          data-jail-max="60"
+          data-fine-min="80000"
+          data-fine-max="80000"
+          data-bail="false"
+          <label
+          <input type="checkbox"...>
+          <span style="font-weight: bold;" >Hivatali személy félrevezetése</span>
+      </label>
+      <div style="font-size:15px; color:gray; margin-left:18px; margin-bottom:8px;">
+         a,  Ha valaki szándékosan hamis információt ad át a Peace Officernek / egyéb hivatali személynek az bűncselekményt követ el.
+      </div>
+      <div style="font-size:15px; color:gray; margin-left:18px; margin-bottom:8px;">
+         b, Ha valaki hamis bejelentést tesz a hatóságoknál, az bűncselekményt követ el.
+    </div>
+
+              <label
+        ><input
+          type="checkbox"
+          name="law"
+          value="5(05)"
+          data-jail-min="0"
+          data-jail-max="0"
+          data-fine-min="100000"
+          data-fine-max="100000"
+          data-bail="none"
+          <label
+          <input type="checkbox"...>
+          <span style="font-weight: bold;">Jogtalan gyülekezés</span>    
+      </label>
+      <div style="font-size:15px; color:gray; margin-left:18px; margin-bottom:8px;">
+         a,  Ha valaki a Peace Officer vagy telek tulajdonos többszöri felszólítására sem hagyja el az állami tulajdonban lévő területet, az vétséget követ el.​
+      </div>
+      <div style="font-size:15px; color:gray; margin-left:18px; margin-bottom:8px;">
+         b, Ha valaki a Peace Officer felszólítására nem hagyja el a lezárt területet, az vétséget követ el.​
+    </div>
+        <div style="font-size:15px; color:gray; margin-left:18px; margin-bottom:8px;">
+         c, Ha egy csoport bejelentetlenül gyülekezik vagy demonstrál abban az esetben az esemény szervezői vétséget követnek el.
+    </div>
+
+          <label
+        ><input
+          type="checkbox"
+          name="law"
+          value="5(06)"
+          data-jail-min="70"
+          data-jail-max="70"
+          data-fine-min="100000"
+          data-fine-max="100000"
+          data-bail="true"
+          <label
+          <input type="checkbox"...> 
+          <span style="font-weight: bold;">Hivatali személy munkájának akadályozása (Óvadék lehetősége)</span>
+      </label>
+      <div style="font-size:15px; color:gray; margin-left:18px; margin-bottom:8px;">
+         a,  Ha valaki szándékosan akadályozza a Peace Officer munkáját, az vétséget követ el.
+      </div>
+      <div style="font-size:15px; color:gray; margin-left:18px; margin-bottom:8px;">
+         b, Ha valaki tudatosan megtagadja a Peace Officer parancsát, az vétséget követ el.
+    </div>
+
+
+          <label
+        ><input
+          type="checkbox"
+          name="law"
+          value="5(07)"
+          data-jail-min="100"
+          data-jail-max="100"
+          data-fine-min="150000"
+          data-fine-max="150000"
+          data-bail="true"
+          <label
+          <input type="checkbox"...>
+          <span style="font-weight: bold;">Fogolyszökés (Óvadék lehetősége)</span>
+      </label>
+      <div style="font-size:15px; color:gray; margin-left:18px; margin-bottom:8px;">
+           Ha valaki a büntetésvégrehajtási intézetből, fogdából vagy rendőri őrizetből megszökik az bűncselekményt követ el.
+      </div>
+
+
+          <label
+        ><input
+          type="checkbox"
+          name="law"
+          value="5(08)"
+          data-jail-min="150"
+          data-jail-max="150"
+          data-fine-min="60000"
+          data-fine-max="60000"
+          data-bail="false"
+          <label
+          <input type="checkbox"...>
+          <span style="font-weight: bold;">Fogolyszöktetés</span>
+       </label>
+      <div style="font-size:15px; color:gray; margin-left:18px; margin-bottom:8px;">
+         a,  Ha valaki a büntetésvégrehajtási intézetből, fogdából vagy rendőri őrizetből a szökést bármilyen módon elősegíti az bűncselekményt követ el.
+      </div>
+
+
+          <label
+        ><input
+          type="checkbox"
+          name="law"
+          value="5(09)"
+          data-jail-min="40"
+          data-jail-max="40"
+          data-fine-min="70000"
+          data-fine-max="70000"
+          data-bail="false"
+          <label
+          <input type="checkbox"...>
+          <span style="font-weight: bold;">Jogosulatlan címhasználat</span>
+      </label>
+      <div style="font-size:15px; color:gray; margin-left:18px; margin-bottom:8px;">
+       Aki mások előtt őt meg nem illető címet használ, illetve kitüntetést vagy egyenruhát jogosulatlanul visel az vétséget követ el.​​
+    </div>
+
+
+          <label
+        ><input
+          type="checkbox"
+          name="law"
+          value="5(10)"
+          data-jail-min="60"
+          data-jail-max="60"
+          data-fine-min="80000"
+          data-fine-max="80000"
+          data-bail="false"
+          <label
+          <input type="checkbox"...>
+          <span style="font-weight: bold;">Határsértés</span>
+       </label>
+      <div style="font-size:15px; color:gray; margin-left:18px; margin-bottom:8px;">
+         a,  Aki a megyehatárt illegálisan vagy nem szabályosan lépi át az vétséget követ el.​
+      </div>
+
+              <label
+        ><input
+          type="checkbox"
+          name="law"
+          value="5(11)"
+          data-jail-min="0"
+          data-jail-max="0"
+          data-fine-min="100000"
+          data-fine-max="100000"
+          data-bail="none"
+          <label
+          <input type="checkbox"...>
+          <span style="font-weight: bold;">Személyazonosság igazolásának elmulasztása</span>
+       </label>
+      <div style="font-size:15px; color:gray; margin-left:18px; margin-bottom:8px;">
+         a,  Aki nem tudja egy fényképes igazolvánnyal személyazonosságát igazolni az vétséget követ el.
+      </div>
+
+
+                <label
+        ><input
+          type="checkbox"
+          name="law"
+          value="5(12)"
+          data-jail-min="60"
+          data-jail-max="60"
+          data-fine-min="80000"
+          data-fine-max="80000"
+          data-bail="false"
+          <label
+          <input type="checkbox"...>
+          <span style="font-weight: bold;">Bűnszervezetben való bűncselekmény elkövetés</span>
+       </label>
+      <div style="font-size:15px; color:gray; margin-left:18px; margin-bottom:8px;">
+         a,  Olyan személy akiről egy kiterejdt nyomozást követően megállapítható, hogy szervezett bűnözői csoport tagja, bűncselekménnyel vádolható.
+      </div>
+    </div>
+</div>
+
+     <div class="accordion-item">
+    <div class="accordion-header" onclick="toggleAccordion(this)">
+      VI. PARAGRAFUS - KÖZLEKEDÉSI BŰNCSELEKMÉNYEK
+    </div>
+    <div class="accordion-content">
+      <label
+        ><input
+          type="checkbox"
+          name="law"
+          value="6(01)"
+          data-jail-min="00"
+          data-jail-max="00"
+          data-fine-min="100000"
+          data-fine-max="100000"
+          data-bail="none"
+      <label
+  <input type="checkbox" ... >
+  <span style="font-weight: bold;">Vezetői engedély nélküli vezetés</span>
+</label>
+      <div style="font-size:15px; color:gray; margin-left:18px; margin-bottom:8px;">
+       a, Ha valaki tudatosan vezetői engedély nélkül gépjárművet arra jogosulatlanul vezet, az vétséget követ el.
+    </div>
+
+
+
+      <label
+        ><input
+          type="checkbox"
+          name="law"
+          value="6(02)"
+          data-jail-min="0"
+          data-jail-max="0"
+          data-fine-min="100000"
+          data-fine-max="100000"
+          data-bail="false"
+ <label
+  <input type="checkbox" ... >
+  <span style="font-weight:bold">Közúti baleset okozása</span>
+</label>
+      <div style="font-size:15px; color:gray; margin-left:18px; margin-bottom:8px;">
+         a,  Ha valaki szándékosan vagy önhibájából adódóan közúti balesetet okoz az vétséget követ el. ​
+      </div>
+
+
+          <label
+        ><input
+          type="checkbox"
+          name="law"
+          value="6(02.1)"
+          data-jail-min="90"
+          data-jail-max="90"
+          data-fine-min="100000"
+          data-fine-max="100000"
+          data-bail="false"
+          <label
+          <input type="checkbox"... >
+          <span style="font-weight: bold;">Halálos közúti baleset okozása</span>
+      </label>
+      <div style="font-size:15px; color:gray; margin-left:18px; margin-bottom:8px;">
+         a,   Ha egy személy szándékosan felelősségre vonás elkerülése végett gépjárművel elmenekül a Peace Officer elől akkor bűncselekményt követ el.
+      </div>
+            <div style="font-size:15px; color:gray; margin-left:18px; margin-bottom:8px;">
+           + Vezetői engedély bevonásara kerül.
+      </div>
+            <div style="font-size:15px; color:#800000; margin-left:18px; margin-bottom:8px; font-weight: bold;">
+           Nem adható egybe mással a VI. paragrafusból!
+      </div>
+
+    
+          <label
+        ><input
+          type="checkbox"
+          name="law"
+          value="6(02.2)"
+          data-jail-min="60"
+          data-jail-max="60"
+          data-fine-min="60000"
+          data-fine-max="60000"
+          data-bail="false"
+          <label
+          <input type="checkbox"...>
+          <span style="font-weight: bold;" >Cserbenhagyásos közúti baleset okozása</span>
+      </label>
+      <div style="font-size:15px; color:gray; margin-left:18px; margin-bottom:8px;">
+         Ha sofőr a sértettet szándékosan cserbenhagyja, nem győződik meg a baleset tagjainak testi épségéről, bűncselekményt követ el.​
+      </div>
+      <div style="font-size:15px; color:gray; margin-left:18px; margin-bottom:8px;">
+           + Vezetői engedély bevonásara kerül.
+      </div>
+      <div style="font-size:15px; color:#800000; margin-left:18px; margin-bottom:8px; font-weight: bold;">
+         Nem adható egybe mással a VI. paragrafusból!
+    </div>
+
+              <label
+        ><input
+          type="checkbox"
+          name="law"
+          value="6(02.3)"
+          data-jail-min="100"
+          data-jail-max="100"
+          data-fine-min="100000"
+          data-fine-max="100000"
+          data-bail="false"
+          <label
+          <input type="checkbox"...>
+          <span style="font-weight: bold;">Cserbenhagyásos halálos közúti baleset okozása</span>    
+      </label>
+      <div style="font-size:15px; color:gray; margin-left:18px; margin-bottom:8px;">
+         + Vezetői engedély bevonásara kerül.
+      </div>
+
+
+          <label
+        ><input
+          type="checkbox"
+          name="law"
+          value="6(03)"
+          data-jail-min="0"
+          data-jail-max="0"
+          data-fine-min="50000"
+          data-fine-max="50000"
+          data-bail="none"
+          <label
+          <input type="checkbox"...> 
+          <span style="font-weight: bold;">Közlekedési táblák/lámpák figyelmenkívül hagyása</span>
+      </label>
+      <div style="font-size:15px; color:gray; margin-left:18px; margin-bottom:8px;">
+         a,  Ha egy személy a gépjárművével figyelmen kívül hagyja a közlekedési táblákat/közlekedési lámpákat, szabálysértést követ el
+      </div>
+
+
+
+          <label
+        ><input
+          type="checkbox"
+          name="law"
+          value="6(04)"
+          data-jail-min="0"
+          data-jail-max="0"
+          data-fine-min="100000"
+          data-fine-max="100000"
+          data-bail="none"
+          <label
+          <input type="checkbox"...>
+          <span style="font-weight: bold;">Gondatlan vezetés</span>
+      </label>
+      <div style="font-size:15px; color:gray; margin-left:18px; margin-bottom:8px;">
+           Ha egy személy veszélyesen, közúti szabályokat szeg, tudatosan gyorsan hajt, mások vagy a saját testi épségét veszélyeztetően vezet vagy a járművének állapota nem megfelelő az szabálysértést követ el.
+      </div>
+      <div style="font-size: 15px; color:gray; margin-left:18px; margin-bottom:8px;">
+        b, Ha egy személy bukósisak nélkül vezet egy motorkerékpárt, gondatlan vezetésnek minősül.​​
+      </div>
+
+
+          <label
+        ><input
+          type="checkbox"
+          name="law"
+          value="6(05)"
+          data-jail-min="0"
+          data-jail-max="0"
+          data-fine-min="60000"
+          data-fine-max="60000"
+          data-bail="false"
+          <label
+          <input type="checkbox"...>
+          <span style="font-weight: bold;">Nitro-dioxid, neonfény, színezett izzó beszerelése</span>
+       </label>
+      <div style="font-size:15px; color:gray; margin-left:18px; margin-bottom:8px;">
+         a,  Ha valaki a gépjárműbe nitro-dioxidot szerel az szabálysértést követ el.​
+      </div>
+      <div style="font-size:15px; color:gray; margin-left:18px; margin-bottom:8px;">
+         b,  Ha valaki autójára neonfényt szerel az szabálysértést követ el.​
+      </div>
+      <div style="font-size:15px; color:gray; margin-left:18px; margin-bottom:8px;">
+         c,  Ha valaki a gépjárműve izzóját színezi az szabálysértést követ el.​
+      </div>
+      <div style="font-size: 15px; color: gray; margin-left: 18px; margin-bottom:8px">
+        Engedélyezett izzó színek: Xenon, Kadmiumsárga
+      </div>
+
+          <label
+        ><input
+          type="checkbox"
+          name="law"
+          value="6(06)"
+          data-jail-min="0"
+          data-jail-max="0"
+          data-fine-min="70000"
+          data-fine-max="70000"
+          data-bail="none"
+          <label
+          <input type="checkbox"...>
+          <span style="font-weight: bold;">Utcai versenyzés</span>
+      </label>
+      <div style="font-size:15px; color:gray; margin-left:18px; margin-bottom:8px;">
+       a, Ha egy személy a közutakon, nyilvános helyeken, engedély nélkül utcai versenyt szervez, vétséget követ el.
+    </div>
+          <div style="font-size:15px; color:gray; margin-left:18px; margin-bottom:8px;">
+       b, Ha egy személy, utcai versenyen vesz részt, ezzel veszélyeztetve mások és saját testi épségét és életét, vétséget követ el.​
+    </div>
+          <div style="font-size:15px; color:gray; margin-left:18px; margin-bottom:8px;">
+       + Vezetői engedély bevonásara kerül.
+    </div>
+
+
+          <label
+        ><input
+          type="checkbox"
+          name="law"
+          value="6(07)"
+          data-jail-min="0"
+          data-jail-max="0"
+          data-fine-min="80000"
+          data-fine-max="80000"
+          data-bail="none"
+          <label
+          <input type="checkbox"...>
+          <span style="font-weight: bold;">Gázolás</span>
+       </label>
+      <div style="font-size:15px; color:gray; margin-left:18px; margin-bottom:8px;">
+         a,  Ha egy személy egy gyalogost szándékosan vagy önhibájából elgázol, az bűncselekményt követ el.
+      </div>
+      <div style="font-size:15px; color:gray; margin-left:18px; margin-bottom:8px;">
+         + Vezetői engedély bevonásara kerül.
+      </div>
+
+              <label
+        ><input
+          type="checkbox"
+          name="law"
+          value="6(08)"
+          data-jail-min="0"
+          data-jail-max="0"
+          data-fine-min="100000"
+          data-fine-max="100000"
+          data-bail="none"
+          <label
+          <input type="checkbox"...>
+          <span style="font-weight: bold;">Forgalmi engedély hiánya</span>
+       </label>
+      <div style="font-size:15px; color:gray; margin-left:18px; margin-bottom:8px;">
+         a,  Ha valaki tudatosan forgalmi engedély nélkül gépjárművet közúton vezet, az vétséget követ el.
+      </div>
+      <div style="font-size:15px; color:#664d03; margin-left:18px; margin-bottom:8px;">
+         A forgalmi matrica a forgalmi lappal együtt érvényes.
+      </div>
+
+
+        <label
+        ><input
+          type="checkbox"
+          name="law"
+          value="6(09)"
+          data-jail-min="0"
+          data-jail-max="0"
+          data-fine-min="50000"
+          data-fine-max="50000"
+          data-bail="none"
+          <label
+          <input type="checkbox"...>
+          <span style="font-weight: bold;">Telefonálás vezetés közben</span>
+       </label>
+      <div style="font-size:15px; color:gray; margin-left:18px; margin-bottom:8px;">
+         a,  Ha egy személy vezetés közben telefonál, ezzel veszélyeztetve a közlekedés más résztvevőit vagy a saját testi épségét, az szabálysértést követ el.
+      </div>
+    </div>
+</div>
+
+     <div class="accordion-item">
+    <div class="accordion-header" onclick="toggleAccordion(this)">
+      VII. PARAGRAFUS - SZÖVETSÉGI BŰNCSELEKMÉNYEK
+    </div>
+    <div class="accordion-content">
+      <label
+        ><input
+          type="checkbox"
+          name="law"
+          value="7(01)"
+          data-jail-min="180"
+          data-jail-max="180"
+          data-fine-min="200000"
+          data-fine-max="200000"
+          data-bail="false"
+      <label
+  <input type="checkbox" ... >
+  <span style="font-weight: bold;">Közszolgálati korrupció</span>
+</label>
+      <div style="font-size:15px; color:gray; margin-left:18px; margin-bottom:8px;">
+       a, Ha a Peace Officer előnyhöz jutatt valakit pénz, tárgy vagy egyéb javakért cserébe akkor bűncselekményt követ el.​​
+    </div>
+    <div style="font-size: 15px; color:gray; margin-left: 18px; margin-bottom: 8px;">
+      b, Ha egy Peace Officer szolgálatteljesítés közben bűncselekményt követ el.
+    </div>
+
+
+
+      <label
+        ><input
+          type="checkbox"
+          name="law"
+          value="7(02)"
+          data-jail-min="120"
+          data-jail-max="120"
+          data-fine-min="150000"
+          data-fine-max="150000"
+          data-bail="false"
+ <label
+  <input type="checkbox" ... >
+  <span style="font-weight:bold">Hatalommal való visszaélés</span>
+</label>
+      <div style="font-size:15px; color:gray; margin-left:18px; margin-bottom:8px;">
+         a,  Ha egy hivatali személy a hatalmával visszaél úgy, hogy ez más állampolgár lelki nyugalmára és/vagy fizikai egészségére hátrányos hatással van bűncselekményt követ el.​​​
+      </div>
+      <div style="font-size: 15px; color:gray; margin-left: 18px; margin-bottom: 8px;">
+        b, Ha egy hivatali személy a hatalmával visszaél úgy, hogy ez a közbiztonságot hátrányosan befolyásolja bűncselekményt követ el.
+      </div>
+
+
+          <label
+        ><input
+          type="checkbox"
+          name="law"
+          value="7(03)"
+          data-jail-min="240"
+          data-jail-max="240"
+          data-fine-min="200000"
+          data-fine-max="200000"
+          data-bail="false"
+          <label
+          <input type="checkbox"... >
+          <span style="font-weight: bold;">Bankautomata rablás</span>
+      </label>
+      <div style="font-size:15px; color:gray; margin-left:18px; margin-bottom:8px;">
+         a,   Ha valaki egy bankárcéghez, bankfiókhoz tartozó automatát próbál meg vagy foszt ki az bűncselekményt követ el.​
+      </div>
+            <div style="font-size:15px; color:gray; margin-left:18px; margin-bottom:8px;">
+           Ha az ATM elleni bűncselekmény a bank területén történik, akkor a bankrablásra vonatkozó szabályozás alkalmazandó.
+      </div>
+            <div style="font-size:15px; color:#800000; margin-left:18px; margin-bottom:8px; font-weight: bold;">
+           Ha valakinek festékes az arca az is ide sorolandó.
+      </div>
+
+    
+          <label
+        ><input
+          type="checkbox"
+          name="law"
+          value="7(04)"
+          data-jail-min="300"
+          data-jail-max="300"
+          data-fine-min="300000"
+          data-fine-max="300000"
+          data-bail="false"
+          <label
+          <input type="checkbox"...>
+          <span style="font-weight: bold;" >Aranybank rablás</span>
+      </label>
+      <div style="font-size:15px; color:gray; margin-left:18px; margin-bottom:8px;">
+         a, Ha valaki egy bankfiók területén rablást követ el, a bankfiókból valutát próbál meg eltulajdonítani az bűncselekményt követ el.​​
+      </div>
+    </div>
+</div>
+
+     <div class="accordion-item">
+    <div class="accordion-header" onclick="toggleAccordion(this)">
+      VIII. PARAGRAFUS - ADÓZÁSSAL KAPCSOLATOS BŰNCSELEKMÉNYEK
+    </div>
+    <div class="accordion-content">
+      <label
+        ><input
+          type="checkbox"
+          name="law"
+          value="8(01)"
+          data-jail-min="60"
+          data-jail-max="60"
+          data-fine-min="120000"
+          data-fine-max="120000"
+          data-bail="true"
+      <label
+  <input type="checkbox" ... >
+  <span style="font-weight: bold;">Nyilvántartásba vételi kötelezettség elmulasztása (Óvadék lehetősége)</span>
+</label>
+      <div style="font-size:15px; color:gray; margin-left:18px; margin-bottom:8px;">
+       a, Aki nyilvántartásba vételhez kötötten működtethető jogi személyt, jogi személyiséggel nem rendelkező jogalanyt nyilvántartásba vételi kötelezettségének elmulasztásával üzemeltet, vétség miatt büntetendő.
+    </div>
+
+
+
+      <label
+        ><input
+          type="checkbox"
+          name="law"
+          value="8(02)"
+          data-jail-min="0"
+          data-jail-max="0"
+          data-fine-min="100000"
+          data-fine-max="100000"
+          data-bail="none"
+ <label
+  <input type="checkbox" ... >
+  <span style="font-weight:bold">Üzletlezárás akadályozása</span>
+</label>
+      <div style="font-size:15px; color:gray; margin-left:18px; margin-bottom:8px;">
+         a,  Aki üzletének lezárását akadályozza, vétség miatt büntetendő.​
+      </div>
+
+
+          <label
+        ><input
+          type="checkbox"
+          name="law"
+          value="8(03)"
+          data-jail-min="60"
+          data-jail-max="60"
+          data-fine-min="100000"
+          data-fine-max="100000"
+          data-bail="false"
+          <label
+          <input type="checkbox"... >
+          <span style="font-weight: bold;">Adóköteles tevékenység folytatása adószám hiányában (Óvadék lehetősége)</span>
+      </label>
+      <div style="font-size:15px; color:gray; margin-left:18px; margin-bottom:8px;">
+         a,   Aki adószámhoz kötött adóköteles tevékenységet adószám hiányában folytat, vétség miatt büntetendő.
+      </div>
+
+    
+          <label
+        ><input
+          type="checkbox"
+          name="law"
+          value="8(04)"
+          data-jail-min="0"
+          data-jail-max="0"
+          data-fine-min="80000"
+          data-fine-max="80000"
+          data-bail="false"
+          <label
+          <input type="checkbox"...>
+          <span style="font-weight: bold;" >A foglalkoztatott bejelentésére vonatkozó szabályok megsértése</span>
+      </label>
+      <div style="font-size:15px; color:gray; margin-left:18px; margin-bottom:8px;">
+         a,  Az adózót mulasztási bírsággal kell sújtani, ha be nem jelentett foglalkoztatottat alkalmaz vagy alkalmazott.
+      </div>
+
+
+              <label
+        ><input
+          type="checkbox"
+          name="law"
+          value="8(05)"
+          data-jail-min="0"
+          data-jail-max="0"
+          data-fine-min="100000"
+          data-fine-max="100000"
+          data-bail="none"
+          <label
+          <input type="checkbox"...>
+          <span style="font-weight: bold;">Számlakibocsátási kötelezettség, valamint iratmegőrzési kötelezettség szabályainak megsértése</span>    
+      </label>
+      <div style="font-size:15px; color:gray; margin-left:18px; margin-bottom:8px;">
+         Az adóhatóság az adózót mulasztási bírsággal sújthatja, ha​ a, számlakibocsátási kötelezettségét elmulasztja vagy a számlát nem a tényleges ellenértékről állítja ki, vagy b, iratmegőrzési kötelezettségének nem tesz eleget.
+      </div>
+
+
+          <label
+        ><input
+          type="checkbox"
+          name="law"
+          value="8(06)"
+          data-jail-min="0"
+          data-jail-max="0"
+          data-fine-min="100000"
+          data-fine-max="100000"
+          data-bail="none"
+          <label
+          <input type="checkbox"...> 
+          <span style="font-weight: bold;">Adatváltozás bejelentésének elmulasztása</span>
+      </label>
+      <div style="font-size:15px; color:gray; margin-left:18px; margin-bottom:8px;">
+         a,  Az adóhatóság az adózót mulasztási bírsággal sújthatja, ha adatváltozást nem jelenti az adóhatóság felé.
+      </div>
+
+
+          <label
+        ><input
+          type="checkbox"
+          name="law"
+          value="8(07)"
+          data-jail-min="0"
+          data-jail-max="0"
+          data-fine-min="100000"
+          data-fine-max="100000"
+          data-bail="none"
+          <label
+          <input type="checkbox"...>
+          <span style="font-weight: bold;">Szerződésszegés</span>
+      </label>
+      <div style="font-size:15px; color:gray; margin-left:18px; margin-bottom:8px;">
+           a, Az adóhatóság az adózót mulasztási bírsággal sújthatja, bármely szerződésszerű kötelezettség teljesítésének az elmulasztása esetén. Szerződésszegés esetén a sérelmet szenvedett fél jogosult a szolgáltatás teljesítésének követelésére.
+      </div>
+
+
+          <label
+        ><input
+          type="checkbox"
+          name="law"
+          value="8(08)"
+          data-jail-min="120"
+          data-jail-max="120"
+          data-fine-min="180000"
+          data-fine-max="180000"
+          data-bail="false"
+          <label
+          <input type="checkbox"...>
+          <span style="font-weight: bold;">Pénzmosás</span>
+       </label>
+      <div style="font-size:15px; color:gray; margin-left:18px; margin-bottom:8px;">
+         a,  Aki a büntetendő cselekményből származó vagyon eredetét, a vagyonon fennálló jogot, a vagyon helyét, ezek változását elfedi, elleplezi vagy átveszi, bűntett miatt büntetendő.
+      </div>
+
+
+          <label
+        ><input
+          type="checkbox"
+          name="law"
+          value="8(09)"
+          data-jail-min="0"
+          data-jail-max="0"
+          data-fine-min="80000"
+          data-fine-max="80000"
+          data-bail="none"
+          <label
+          <input type="checkbox"...>
+          <span style="font-weight: bold;">Csalás</span>
+      </label>
+      <div style="font-size:15px; color:gray; margin-left:18px; margin-bottom:8px;">
+       Aki jogtalan haszonszerzés végett mást tévedésbe ejt, vagy tévedésben tart, és ezzel kárt okoz, vétség miatt büntetendő.
+    </div>
+
+
+          <label
+        ><input
+          type="checkbox"
+          name="law"
+          value="8(10)"
+          data-jail-min="120"
+          data-jail-max="120"
+          data-fine-min="200000"
+          data-fine-max="200000"
+          data-bail="false"
+          <label
+          <input type="checkbox"...>
+          <span style="font-weight: bold;">Adócsalás</span>
+       </label>
+      <div style="font-size:15px; color:gray; margin-left:18px; margin-bottom:8px;">
+         a,  Aki költségvetésbe történő befizetési kötelezettségét vagy költségvetésből származó pénzeszközök vonatkozásában mást tévedésbe ejt, tévedésben tart, valótlan tartalmú nyilatkozatot tesz, vagy a valós tényt elhallgatja, bűntett miatt büntetendő.
+      </div>
+
+              <label
+        ><input
+          type="checkbox"
+          name="law"
+          value="8(11)"
+          data-jail-min="0"
+          data-jail-max="0"
+          data-fine-min="0"
+          data-fine-max="0"
+          data-bail="none"
+          <label
+          <input type="checkbox"...>
+          <span style="font-weight: bold;">Késedelmi pótlék</span>
+       </label>
+      <div style="font-size:15px; color:gray; margin-left:18px; margin-bottom:8px;">
+         a,  Az adó késedelmes megfizetése esetén az esedékesség napját követő naptól, mint kezdőnaptól az adó tényleges megfizetésének napjáig késedelmi pótlékot kell fizetni. Az esedékesség napja minden hónap tízedik naptári napja. A késedelmi pótlék-fizetési kötelezettség utolsó napja az üzletlezárás feloldásának napja
+      </div>
+      <div style="font-size:15px; color:gray; margin-left:18px; margin-bottom:8px;">
+         b,  A késedelmi pótlék mértéke a késedelembe esés napján fennálló adótartozás tíz százaléka.​
+      </div>
+      <div style="font-size:15px; color:gray; margin-left:18px; margin-bottom:8px;">
+         c,  A késedelmi pótlék az adó tényleges megfizetéséig naptári naponként esedékes.​
+      </div>
+      <div style="font-size:15px; color:gray; margin-left:18px; margin-bottom:8px;">
+         d,  Az adóhatóság külön döntés meghozatala és az erről való tájékoztatás nélkül az adószámlán előírja a késedelmi pótlékot.
+      </div>
+
+
+                <label
+        ><input
+          type="checkbox"
+          name="law"
+          value="8(12)"
+          data-jail-min="0"
+          data-jail-max="0"
+          data-fine-min="0"
+          data-fine-max="0"
+          data-bail="none"
+          <label
+          <input type="checkbox"...>
+          <span style="font-weight: bold;">Üzletlezárás elrendelése</span>
+       </label>
+      <div style="font-size:15px; color:gray; margin-left:18px; margin-bottom:8px;">
+         1,  Az adóhatóság az adóköteles tevekénység célját szolgáló helyiséget az esedékesség napját követő naptól, mint kezdőnaptól a késedelmi díjjal terhelt esedékes adó tényleges megfizetésének napjáig lezárja. A késedelmi pótlék-fizetési kötelezettség utolsó napja az üzletlezárás feloldásának napja.​
+      </div>
+      <div style="font-size:15px; color:gray; margin-left:18px; margin-bottom:8px;">
+         2,  Az adóhatóság mulasztási bírság kiszabása mellett az adóköteles tevékenység célját szolgáló helyiséget hét nyilvántartási napra lezárhatja, ha az adózó
+      </div>
+       <div style="font-size:15px; color:gray; margin-left:18px; margin-bottom:8px;">
+         a,  be nem jelentett foglalkoztatottat foglalkoztat vagy foglalkoztatott,
+      </div>
+      <div style="font-size:15px; color:gray; margin-left:18px; margin-bottom:8px;">
+         b,  az adóköteles tevékenység célját szolgáló helyiségben elmulasztotta számlakibocsátási kötelezettségét,
+      </div>
+      <div style="font-size:15px; color:gray; margin-left:18px; margin-bottom:8px;">
+         c,  nyilvántartásba vételi kötelezettségét elmulasztja.
+      </div>
+    </div>
+</div>
+
+<script>
+  const checkboxes = document.querySelectorAll('input[name="law"]');
+  const jailMinEl = document.getElementById('jailMin');
+  const jailMaxEl = document.getElementById('jailMax');
+  const fineMinEl = document.getElementById('fineMin');
+  const fineMaxEl = document.getElementById('fineMax');
+  const resultBox = document.getElementById('resultBox');
+  const bailStatus = document.getElementById('bailStatus');
+
+  const maxJail = 300; // Max börtönidő percben
+  let maxFineLimit = 300000; // Szabadon állítható maximum bírság
+
+  checkboxes.forEach((cb) => cb.addEventListener('change', updateTotals));
+
+  function toggleAccordion(header) {
+    const content = header.nextElementSibling;
+    content.style.display = content.style.display === 'block' ? 'none' : 'block';
+  }
+
+
+function updateTotals() {
+  let jailMin = 0,
+      jailMax = 0;
+  let fineMin = 0,
+      fineMax = 0;
+  let selectedLaws = [];
+
+  let allBailPossible = true;  // Kezdjük úgy, hogy mindnél lehetséges az óvadék, ha találunk egy falset, false lesz
+
+  checkboxes.forEach((cb) => {
+    if (cb.checked) {
+      jailMin += +cb.dataset.jailMin;
+      jailMax += +cb.dataset.jailMax;
+      fineMin += +cb.dataset.fineMin;
+      fineMax += +cb.dataset.fineMax;
+      selectedLaws.push(cb.value);
+
+      if (cb.dataset.bail !== 'true') {
+        allBailPossible = false; // ha legalább egy false, akkor nem mindenhol lehetséges
+      }
+    }
+  });
+
+  jailMin = Math.min(jailMin, maxJail);
+  jailMax = Math.min(jailMax, maxJail);
+  fineMin = Math.min(fineMin, maxFineLimit);
+  fineMax = Math.min(fineMax, maxFineLimit);
+
+  jailMinEl.textContent = jailMin;
+  jailMaxEl.textContent = jailMax;
+  fineMinEl.textContent = fineMin;
+  fineMaxEl.textContent = fineMax;
+  resultBox.value = selectedLaws.join(', ');
+
+  resultBox.style.height = 'auto';
+  resultBox.style.height = resultBox.scrollHeight + 'px';
+
+  if (selectedLaws.length === 0) {
+    bailStatus.textContent = '-';
+    bailStatus.style.color = 'black';
+  } else if (allBailPossible) {
+    bailStatus.textContent = 'Lehetséges';
+    bailStatus.style.color = 'green';
+  } else {
+    bailStatus.textContent = 'Nem lehetséges';
+    bailStatus.style.color = 'red';
+  }
+}
+
+
+
+  const checkbox = document.getElementById("lawCheckbox");
+  const bailStatusElement = document.getElementById("bailStatus");
+  const bailRow = document.getElementById("bailRow");
+
+  const isBailAllowed = checkbox.dataset.bail === "true";
+
+  if (isBailAllowed) {
+    bailStatusElement.textContent = "Lehetséges";
+    bailRow.style.display = "block"; // csak akkor kell, ha alapból rejtve van
+  } else {
+    bailRow.style.display = "none";
+  }
+
+
+  function clearSelection() {
+    checkboxes.forEach((cb) => (cb.checked = false));
+    updateTotals();
+  }
+
+  function copyToClipboard() {
+    resultBox.select();
+    document.execCommand('copy');
+    alert('Másolva!');
+  }
+</script>
+
+</body>
+</html>
